@@ -98,13 +98,13 @@ var initHttpServer = () => {
 //     При POST запросе сервер подключается к указанному узлу и отправляет сообщение обновления всем узлам в сети.
 
 
-//Реализуем функцию mineBlock
 var mineBlock = (blockData) =>{
     var previousBlock = getLatestBlock();
     var nextIndex = previousBlock.index + 1;
     var nonce = 0;
     var nextTimeStamp = new Date().getTime() / 1000;
     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce);
+    //проверка на соответствие требованию к хешу
     while (nextHash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
         nonce++;
         nextTimeStamp = new Date().getTime() / 1000;
@@ -201,12 +201,16 @@ var handleBlockChainResponse = (message) =>{
 //     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nextHash);
 // };
 
+
+//передача свойств для подсчета хеша
 var calculateHashForBlock = (block) => {
     return calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
 };
 
+
+//описание метода подсчета хеша
 var calculateHash = (index, previousHash, timestamp, data, nonce) => {
-    return CryptoJS.SHA256(index + previousHash + timestamp + data + nonce).toString();
+    return CryptoJS.SHA512(index + previousHash + timestamp + data + nonce).toString();
 };
 
 var addBlock = (newBlock) => {
