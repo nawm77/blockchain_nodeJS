@@ -105,12 +105,19 @@ var mineBlock = (blockData) =>{
     var nextTimeStamp = new Date().getTime() / 1000;
     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce);
     //проверка на соответствие требованию к хешу
-    while (nextHash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+    // while (nextHash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+    //     nonce++;
+    //     nextTimeStamp = new Date().getTime() / 1000;
+    //     nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce)
+    //     console.log("\"index\":" + nextIndex + ", \"previousHash\":"+previousBlock.hash+"\"timestamp\":" + nextTimeStamp+",\"data\":" + blockData+
+    //     ",\x1b[33mhash: " + nextHash + " \x1b[0m,"+"\difficulty\":"+difficulty+" \x1b[33mnonce: " + nonce + " \x1b[0m ");
+    // }
+    while(nextHash.substring(0, difficulty) !== previousBlock.hash.substring(previousBlock.hash.length-difficulty, previousBlock.hash.length) || (nextHash === previousBlock.hash)){
         nonce++;
-        nextTimeStamp = new Date().getTime() / 1000;
-        nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce)
+        nextTimeStamp = new Date().getTime()/1000;
+        nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce);
         console.log("\"index\":" + nextIndex + ", \"previousHash\":"+previousBlock.hash+"\"timestamp\":" + nextTimeStamp+",\"data\":" + blockData+
-        ",\x1b[33mhash: " + nextHash + " \x1b[0m,"+"\difficulty\":"+difficulty+" \x1b[33mnonce: " + nonce + " \x1b[0m ");
+            ",\x1b[33mhash: " + nextHash + " \x1b[0m,"+"\difficulty\":"+difficulty+" \x1b[33mnonce: " + nonce + " \x1b[0m ");
     }
     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nextHash, difficulty, nonce);
 }
@@ -198,7 +205,7 @@ var handleBlockChainResponse = (message) =>{
 //     var nextIndex = previousBlock.index + 1;
 //     var nextTimeStamp = new Date().getTime()/1000;
 //     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData);
-//     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nextHash);
+//     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, previousBlock.hash);
 // };
 
 
@@ -229,6 +236,9 @@ var isValidNewBlock = (newBlock, previousBlock) => {
     } else if (calculateHashForBlock(newBlock) !== newBlock.hash){
         console.log(typeof (newBlock.hash) + ' ' + typeof calculateHashForBlock(newBlock));
         console.log('invalid hash: ' + calculateHashForBlock(newBlock) + ' ' + newBlock.hash);
+        return false;
+    } else if (newBlock.hash === previousBlock.hash){
+        console.log('Same hash for previous block and current block');
         return false;
     }
     return true;
