@@ -15,12 +15,9 @@ var bodyParser = require("body-parser");
 var WebSocket = require("ws");
 
 
-//Объявляются порты как для клиент-серверного соединения, так иP2P.
-//Если  в  переменных  среды  заранее  заданных  значений  нет,  то используем стандартные.
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 
-//Добавим переменную сложности (кол-во нулей)
 var difficulty = 4;
 
 
@@ -35,8 +32,6 @@ class Block {
         this.timestamp = timestamp;
         this.data = data;
         this.hash = hash;
-        this.difficulty = difficulty;
-        //nonce - число, которое будет каждый раз увеличиваться с каждой попыткой поиска подходящего хеша (тем самым мы каждый раз ищем все новое число, в котором хеш будет соответствовать требованиям
         this.nonce = nonce;
     }
 }
