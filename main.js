@@ -184,18 +184,6 @@ var handleBlockChainResponse = (message) =>{
     }
 };
 
-//Проинициализируем и определим функции, используемые для генерации блока, расчета хеша, добавления блока в цепочку и проверки блока.
-//Для генерации блока нам необходимо знать хеш предыдущего блока. Мы всегда должны иметь возмрожность проверить, является ли блок допустимым
-
-// var generateNextBlock =(blockData) => {
-//     var previousBlock = getLatestBlock();
-//     var nextIndex = previousBlock.index + 1;
-//     var nextTimeStamp = new Date().getTime()/1000;
-//     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData);
-//     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, previousBlock.hash);
-// };
-
-
 //передача свойств для подсчета хеша
 var calculateHashForBlock = (block) => {
     return calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
