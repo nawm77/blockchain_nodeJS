@@ -28,14 +28,6 @@ var difficulty = 4;
 //     когда узлы должны знать друг о друге для обмена данными
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
-
-// Этот  код определяет  класс  Block,  который  используется  для  создания объектов, представляющих блоки в блокчейн-сети.
-// constructor(index,  previousHash,  timestamp,  data,  hash)  определяет конструктор класса, который принимает следующие аргументы:
-// •index-число, представляющее индекс блока в цепочке блоков.
-// •previousHash-строка,  представляющая  хеш  предыдущего  блока  в цепочке блоков.
-// •timestamp-число, представляющее метку времени создания блока.
-// •data-любые данные, которые будут сохранены в блоке.
-// •hash-строка, представляющая уникальный хеш текущего блока.
 class Block {
     constructor(index, previousHash, timestamp, data, hash, difficulty, nonce) {
         this.index = index;
