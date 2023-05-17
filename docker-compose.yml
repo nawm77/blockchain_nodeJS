@@ -1,0 +1,26 @@
+version: '3'
+services:
+  blockchain1:
+    container_name: blockchain_node1
+    image: blockchain
+    ports:
+      - "3001:3001"
+    environment:
+      HTTP_PORT: 3001
+      P2P_PORT: 6001
+    networks:
+      - my-network
+  blockchain2:
+    container_name: blockchain_node2
+    image: blockchain
+    ports:
+      - "3002:3002"
+    environment:
+      HTTP_PORT: 3002
+      P2P_PORT: 6002
+      PEERS: ws://blockchain1:6001
+    networks:
+      - my-network
+networks:
+  my-network:
+    driver: bridge

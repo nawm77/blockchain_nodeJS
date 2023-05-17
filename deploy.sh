@@ -1,0 +1,2 @@
+docker run -d -p 3001:3001 -e HTTP_PORT=3001 -e P2P_PORT=6001 --network=my-network --name blockchain1 blockchain
+docker run -d -p 3002:3002 -e HTTP_PORT=3002 -e P2P_PORT=6001 --network=my-network -e PEERS=ws://blockchain1:6001 --name blockchain2 blockchain

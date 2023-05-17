@@ -15,12 +15,9 @@ var bodyParser = require("body-parser");
 var WebSocket = require("ws");
 
 
-//Объявляются порты как для клиент-серверного соединения, так иP2P.
-//Если  в  переменных  среды  заранее  заданных  значений  нет,  то используем стандартные.
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 
-//Добавим переменную сложности (кол-во нулей)
 var difficulty = 4;
 
 
@@ -28,14 +25,6 @@ var difficulty = 4;
 //     когда узлы должны знать друг о друге для обмена данными
 var initialPeers = process.env.PEERS ? process.env.PEERS.split(',') : [];
 
-
-// Этот  код определяет  класс  Block,  который  используется  для  создания объектов, представляющих блоки в блокчейн-сети.
-// constructor(index,  previousHash,  timestamp,  data,  hash)  определяет конструктор класса, который принимает следующие аргументы:
-// •index-число, представляющее индекс блока в цепочке блоков.
-// •previousHash-строка,  представляющая  хеш  предыдущего  блока  в цепочке блоков.
-// •timestamp-число, представляющее метку времени создания блока.
-// •data-любые данные, которые будут сохранены в блоке.
-// •hash-строка, представляющая уникальный хеш текущего блока.
 class Block {
     constructor(index, previousHash, timestamp, data, hash, difficulty, nonce) {
         this.index = index;
@@ -43,8 +32,6 @@ class Block {
         this.timestamp = timestamp;
         this.data = data;
         this.hash = hash;
-        this.difficulty = difficulty;
-        //nonce - число, которое будет каждый раз увеличиваться с каждой попыткой поиска подходящего хеша (тем самым мы каждый раз ищем все новое число, в котором хеш будет соответствовать требованиям
         this.nonce = nonce;
     }
 }
@@ -98,19 +85,26 @@ var initHttpServer = () => {
 //     При POST запросе сервер подключается к указанному узлу и отправляет сообщение обновления всем узлам в сети.
 
 
-//Реализуем функцию mineBlock
 var mineBlock = (blockData) =>{
     var previousBlock = getLatestBlock();
     var nextIndex = previousBlock.index + 1;
     var nonce = 0;
     var nextTimeStamp = new Date().getTime() / 1000;
     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce);
-    while (nextHash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+    //проверка на соответствие требованию к хешу
+    // while (nextHash.substring(0, difficulty) !== Array(difficulty + 1).join("0")){
+    //     nonce++;
+    //     nextTimeStamp = new Date().getTime() / 1000;
+    //     nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce)
+    //     console.log("\"index\":" + nextIndex + ", \"previousHash\":"+previousBlock.hash+"\"timestamp\":" + nextTimeStamp+",\"data\":" + blockData+
+    //     ",\x1b[33mhash: " + nextHash + " \x1b[0m,"+"\difficulty\":"+difficulty+" \x1b[33mnonce: " + nonce + " \x1b[0m ");
+    // }
+    while(nextHash.substring(0, difficulty) !== previousBlock.hash.substring(previousBlock.hash.length-difficulty, previousBlock.hash.length) || (nextHash === previousBlock.hash)){
         nonce++;
-        nextTimeStamp = new Date().getTime() / 1000;
-        nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce)
+        nextTimeStamp = new Date().getTime()/1000;
+        nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nonce);
         console.log("\"index\":" + nextIndex + ", \"previousHash\":"+previousBlock.hash+"\"timestamp\":" + nextTimeStamp+",\"data\":" + blockData+
-        ",\x1b[33mhash: " + nextHash + " \x1b[0m,"+"\difficulty\":"+difficulty+" \x1b[33mnonce: " + nonce + " \x1b[0m ");
+            ",\x1b[33mhash: " + nextHash + " \x1b[0m,"+"\difficulty\":"+difficulty+" \x1b[33mnonce: " + nonce + " \x1b[0m ");
     }
     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nextHash, difficulty, nonce);
 }
@@ -190,23 +184,15 @@ var handleBlockChainResponse = (message) =>{
     }
 };
 
-//Проинициализируем и определим функции, используемые для генерации блока, расчета хеша, добавления блока в цепочку и проверки блока.
-//Для генерации блока нам необходимо знать хеш предыдущего блока. Мы всегда должны иметь возмрожность проверить, является ли блок допустимым
-
-// var generateNextBlock =(blockData) => {
-//     var previousBlock = getLatestBlock();
-//     var nextIndex = previousBlock.index + 1;
-//     var nextTimeStamp = new Date().getTime()/1000;
-//     var nextHash = calculateHash(nextIndex, previousBlock.hash, nextTimeStamp, blockData);
-//     return new Block(nextIndex, previousBlock.hash, nextTimeStamp, blockData, nextHash);
-// };
-
+//передача свойств для подсчета хеша
 var calculateHashForBlock = (block) => {
     return calculateHash(block.index, block.previousHash, block.timestamp, block.data, block.nonce);
 };
 
+
+//описание метода подсчета хеша
 var calculateHash = (index, previousHash, timestamp, data, nonce) => {
-    return CryptoJS.SHA256(index + previousHash + timestamp + data + nonce).toString();
+    return CryptoJS.SHA512(index + previousHash + timestamp + data + nonce).toString();
 };
 
 var addBlock = (newBlock) => {
@@ -225,6 +211,9 @@ var isValidNewBlock = (newBlock, previousBlock) => {
     } else if (calculateHashForBlock(newBlock) !== newBlock.hash){
         console.log(typeof (newBlock.hash) + ' ' + typeof calculateHashForBlock(newBlock));
         console.log('invalid hash: ' + calculateHashForBlock(newBlock) + ' ' + newBlock.hash);
+        return false;
+    } else if (newBlock.hash === previousBlock.hash){
+        console.log('Same hash for previous block and current block');
         return false;
     }
     return true;
