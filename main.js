@@ -18,7 +18,7 @@ var WebSocket = require("ws");
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 
-var difficulty = 4;
+var difficulty = process.env.DIFFICULTY || 3;
 
 
 // используется для реализации сетевой логики, например, при создании пиринговой сети,
@@ -192,8 +192,36 @@ var calculateHashForBlock = (block) => {
 
 //описание метода подсчета хеша
 var calculateHash = (index, previousHash, timestamp, data, nonce) => {
-    return CryptoJS.SHA512(index + previousHash + timestamp + data + nonce).toString();
+    let key = previousHash.substring(0,6);
+    let message = encryptVigenere(index + previousHash + timestamp + data + nonce, key);
+    // return encryptVigenere(CryptoJS.SHA512(index + previousHash + timestamp + data + nonce).toString(), key);
+    return CryptoJS.SHA512(message).toString();
 };
+
+var encryptVigenere = (message, key) => {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz1234567890';
+    const messageLength = message.length;
+    const keyLength = key.length;
+
+    let encryptedMessage = '';
+
+    for (let i = 0; i < messageLength; i++) {
+        const messageChar = message[i];
+        const keyChar = key[i % keyLength];
+
+        if (alphabet.includes(messageChar)) {
+            const messageIndex = alphabet.indexOf(messageChar);
+            const keyIndex = alphabet.indexOf(keyChar);
+            const encryptedIndex = (messageIndex + keyIndex) % alphabet.length;
+            const encryptedChar = alphabet[encryptedIndex];
+            encryptedMessage += encryptedChar;
+        } else {
+            encryptedMessage += messageChar;
+        }
+    }
+
+    return encryptedMessage;
+}
 
 var addBlock = (newBlock) => {
     if (isValidNewBlock(newBlock, getLatestBlock())){
