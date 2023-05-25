@@ -8,7 +8,7 @@ services:
     environment:
       HTTP_PORT: 3001
       P2P_PORT: 6001
-      DIFFICULTY: 4
+      DIFFICULTY: 5
     networks:
       - my-network
   blockchain2:
@@ -19,7 +19,7 @@ services:
     environment:
       HTTP_PORT: 3002
       P2P_PORT: 6002
-      DIFFICULTY: 4
+      DIFFICULTY: 5
       PEERS: ws://blockchain1:6001
     networks:
       - my-network

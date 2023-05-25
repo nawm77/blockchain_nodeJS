@@ -18,7 +18,7 @@ var WebSocket = require("ws");
 var http_port = process.env.HTTP_PORT || 3001;
 var p2p_port = process.env.P2P_PORT || 6001;
 
-var difficulty = process.env.DIFFICULTY || 3;
+var difficulty = process.env.DIFFICULTY || 4;
 
 
 // используется для реализации сетевой логики, например, при создании пиринговой сети,
@@ -192,7 +192,7 @@ var calculateHashForBlock = (block) => {
 
 //описание метода подсчета хеша
 var calculateHash = (index, previousHash, timestamp, data, nonce) => {
-    let key = previousHash.substring(0,6);
+    let key = previousHash.substring(0,3);
     let message = encryptVigenere(index + previousHash + timestamp + data + nonce, key);
     // return encryptVigenere(CryptoJS.SHA512(index + previousHash + timestamp + data + nonce).toString(), key);
     return CryptoJS.SHA512(message).toString();
